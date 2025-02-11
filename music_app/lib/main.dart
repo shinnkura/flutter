@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
@@ -23,8 +24,11 @@ class MusicApp extends StatefulWidget {
 }
 
 class _MusicAppState extends State<MusicApp> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
   List<Song> _popularSongs = [];
   bool _isInitializing = false;
+  Song? _selectedSong;
+  bool _isPlay = false;
 
   @override
   void initState() {
@@ -38,6 +42,22 @@ class _MusicAppState extends State<MusicApp> {
       _popularSongs = songs;
       _isInitializing = true;
     });
+  }
+
+  // 音楽を再生する処理
+  void _play() {
+    _audioPlayer.play(UrlSource(_selectedSong?.previewUrl ?? ''));
+    setState(() {
+      _isPlay = true;
+    });
+  }
+
+  // 音楽を選択した場合の処理
+  void _handleSongSelected(Song song) {
+    setState(() {
+      _selectedSong = song;
+    });
+    _play();
   }
 
   @override
@@ -105,34 +125,31 @@ class _MusicAppState extends State<MusicApp> {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                      child: !_isInitializing
-                          ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          : CustomScrollView(
-                              slivers: [
-                                SliverToBoxAdapter(
-                                  child: LayoutGrid(
-                                    columnSizes: [1.fr, 1.fr],
-                                    rowSizes: List<
-                                        IntrinsicContentTrackSize>.generate(
-                                      (_popularSongs.length / 2).round(),
-                                      (int index) => auto,
-                                    ),
-                                    children: _popularSongs
-                                        .map((song) => SongCard(song: song))
-                                        .toList(),
+                    child: !_isInitializing
+                        ? const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : CustomScrollView(
+                            slivers: [
+                              SliverToBoxAdapter(
+                                child: LayoutGrid(
+                                  columnSizes: [1.fr, 1.fr],
+                                  rowSizes:
+                                      List<IntrinsicContentTrackSize>.generate(
+                                    (_popularSongs.length / 2).round(),
+                                    (int index) => auto,
                                   ),
-                                )
-                              ],
-                            )
-
-                      // GridView.count(
-                      //     childAspectRatio: 0.75,
-                      //     crossAxisCount: 2,
-                      //     children: _popularSongs.map((song) => SongCard(song: song)).toList(),
-                      //   ),
-                      ),
+                                  children: _popularSongs
+                                      .map((song) => SongCard(
+                                            song: song,
+                                            onTap: _handleSongSelected,
+                                          ))
+                                      .toList(),
+                                ),
+                              )
+                            ],
+                          ),
+                  ),
                 ],
               ),
             ],
