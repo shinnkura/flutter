@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/modules/songs/song.dart';
 
 class Player extends StatelessWidget {
+  final Song song;
+  final bool isPlay;
+  final void Function() onButtonTap;
   const Player({
     super.key,
+    required this.song,
+    required this.isPlay,
+    required this.onButtonTap,
   });
 
   @override
@@ -21,8 +28,7 @@ class Player extends StatelessWidget {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(
-                        "https://i.scdn.co/image/ab67616d0000b273151dedf4ac086e6bb4dee739"),
+                    backgroundImage: NetworkImage(song.albumImageUrl),
                     radius: 20,
                   ),
                   const SizedBox(width: 8),
@@ -31,7 +37,7 @@ class Player extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "毎日 - Every Day",
+                          song.name,
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -40,7 +46,7 @@ class Player extends StatelessWidget {
                           maxLines: 1,
                         ),
                         Text(
-                          "米津玄師",
+                          song.artistName,
                           style: const TextStyle(
                             color: Colors.grey,
                           ),
@@ -53,8 +59,18 @@ class Player extends StatelessWidget {
             ),
             Center(
               child: GestureDetector(
-                child:
-                    Icon(Icons.play_circle_fill, color: Colors.white, size: 40),
+                onTap: onButtonTap,
+                child: isPlay
+                    ? const Icon(
+                        Icons.stop_circle,
+                        color: Colors.white,
+                        size: 40,
+                      )
+                    : const Icon(
+                        Icons.play_circle_fill,
+                        color: Colors.white,
+                        size: 40,
+                      ),
               ),
             )
           ],
