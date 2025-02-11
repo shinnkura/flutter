@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:music_app/lib/spotify.dart';
+import 'package:music_app/modules/songs/song.dart';
 import 'package:music_app/widgets/song_card.dart';
 
 void main() async {
@@ -21,6 +23,9 @@ class MusicApp extends StatefulWidget {
 }
 
 class _MusicAppState extends State<MusicApp> {
+  List<Song> _popularSongs = [];
+  bool _isInitializing = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +34,10 @@ class _MusicAppState extends State<MusicApp> {
 
   void _initialize() async {
     final songs = await spotify.getPopularSongs();
-    print(songs);
+    setState(() {
+      _popularSongs = songs;
+      _isInitializing = true;
+    });
   }
 
   @override
@@ -97,18 +105,34 @@ class _MusicAppState extends State<MusicApp> {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: GridView.count(
-                      childAspectRatio: 0.75,
-                      crossAxisCount: 2,
-                      children: [
-                        SongCard(),
-                        SongCard(),
-                        SongCard(),
-                        SongCard(),
-                        SongCard(),
-                      ],
-                    ),
-                  ),
+                      child: !_isInitializing
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : CustomScrollView(
+                              slivers: [
+                                SliverToBoxAdapter(
+                                  child: LayoutGrid(
+                                    columnSizes: [1.fr, 1.fr],
+                                    rowSizes: List<
+                                        IntrinsicContentTrackSize>.generate(
+                                      (_popularSongs.length / 2).round(),
+                                      (int index) => auto,
+                                    ),
+                                    children: _popularSongs
+                                        .map((song) => SongCard(song: song))
+                                        .toList(),
+                                  ),
+                                )
+                              ],
+                            )
+
+                      // GridView.count(
+                      //     childAspectRatio: 0.75,
+                      //     crossAxisCount: 2,
+                      //     children: _popularSongs.map((song) => SongCard(song: song)).toList(),
+                      //   ),
+                      ),
                 ],
               ),
             ],

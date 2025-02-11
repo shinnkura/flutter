@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:music_app/modules/songs/song.dart';
 
 late SpotifyClient spotify;
 
@@ -30,7 +31,7 @@ class SpotifyClient {
     return spotify;
   }
 
-  dynamic getPopularSongs() async {
+  Future<List<Song>> getPopularSongs() async {
     Response response = await dio.get(
       'https://api.spotify.com/v1/playlists/2B3ircWQBR3QDlcImOo51S/tracks',
       options: Options(
@@ -39,6 +40,14 @@ class SpotifyClient {
         },
       ),
     );
-    return response.data["items"].map((item) => item["track"]);
+    return response.data["items"].map<Song>((item) {
+      final song = item["track"];
+      return Song.fromJson({
+        "name": song["name"],
+        "artistName": song["artists"][0]["name"],
+        "albumImageUrl": song["album"]["images"][0]["url"],
+        "previewUrl": song["preview_url"],
+      });
+    }).toList();
   }
 }
