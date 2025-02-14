@@ -30,6 +30,8 @@ class _MusicAppState extends State<MusicApp> {
   bool _isInitializing = false;
   Song? _selectedSong;
   bool _isPlay = false;
+  String _keyword = '';
+  List<Song> _searchedSongs = []; // 検索結果の一覧が入る
 
   @override
   void initState() {
@@ -53,6 +55,14 @@ class _MusicAppState extends State<MusicApp> {
     });
   }
 
+  // 音楽を停止する処理
+  void _stop() {
+    _audioPlayer.stop();
+    setState(() {
+      _isPlay = false;
+    });
+  }
+
   // 音楽を選択した場合の処理
   void _handleSongSelected(Song song) {
     if (song.previewUrl == null) {
@@ -65,16 +75,22 @@ class _MusicAppState extends State<MusicApp> {
     _play();
   }
 
-  // 音楽を停止する処理
-  void _stop() {
-    _audioPlayer.stop();
+  void _handleTextFieldChanged(String value) {
     setState(() {
-      _isPlay = false;
+      _keyword = value;
+    });
+  }
+
+  void _searchSongs() async {
+    final songs = await spotify.searchSongs(_keyword);
+    setState(() {
+      _searchedSongs = songs;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final songs = _searchedSongs.isEmpty ? _popularSongs : _searchedSongs;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF0E0E10),
@@ -121,6 +137,8 @@ class _MusicAppState extends State<MusicApp> {
                                 hintStyle: TextStyle(color: Colors.white70),
                                 border: InputBorder.none,
                               ),
+                              onChanged: _handleTextFieldChanged,
+                              onEditingComplete: () => _searchSongs(),
                             ),
                           ),
                         ],
@@ -147,12 +165,11 @@ class _MusicAppState extends State<MusicApp> {
                               SliverToBoxAdapter(
                                 child: LayoutGrid(
                                   columnSizes: [1.fr, 1.fr],
-                                  rowSizes:
-                                      List<IntrinsicContentTrackSize>.generate(
-                                    (_popularSongs.length / 2).round(),
-                                    (int index) => auto,
-                                  ),
-                                  children: _popularSongs
+                                  rowSizes: [
+                                    100.px,
+                                    1.fr,
+                                  ],
+                                  children: songs
                                       .map((song) => SongCard(
                                             song: song,
                                             onTap: _handleSongSelected,
