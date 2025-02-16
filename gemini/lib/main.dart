@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 
+const prompt = '''
+あなたは20年以上のキャリアがあるフルスタックエンジニアです。
+今から渡されるコードの
+・問題点の指摘
+・問題点を修正し、より簡潔にしたコード
+・修正点の説明
+をそれぞれ別々でMarkdown形式かつ、タイトル部分を###で出力してください。
+問題点の指摘や修正点の説明は、プログラミング初心者にもわかるように、詳しく背景を説明してください。
+''';
+
 void main() async {
   await dotenv.load(fileName: '.env');
   Gemini.init(apiKey: dotenv.env['GEMINI_API_KEY']!);
@@ -24,13 +34,14 @@ class CodeReviewer extends StatefulWidget {
 
 class _CodeReviewerState extends State<CodeReviewer> {
   bool _isLoading = false;
+  String _content = '';
 
   void _review() async {
     setState(() {
       _isLoading = true;
     });
 
-    final response = await Gemini.instance.text('Next.jsについて解説してください。');
+    final response = await Gemini.instance.text(prompt + _content);
     print(response?.output);
 
     setState(() {
@@ -56,6 +67,8 @@ class _CodeReviewerState extends State<CodeReviewer> {
                       padding: const EdgeInsets.all(16.0),
                       child: TextFormField(
                         maxLines: null,
+                        onChanged: (value) => setState(() => _content = value),
+                        initialValue: _content,
                         style: const TextStyle(color: Colors.white),
                         decoration: const InputDecoration(
                           border: InputBorder.none,
@@ -66,7 +79,7 @@ class _CodeReviewerState extends State<CodeReviewer> {
                     ),
             ),
             ElevatedButton(
-              onPressed: _isLoading ? null : _review,
+              onPressed: _isLoading || _content.isEmpty ? null : _review,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 0),
                 backgroundColor: Colors.indigo[600],
