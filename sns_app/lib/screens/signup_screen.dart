@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sns_app/modules/auth/auth.repository.dart';
 import 'package:sns_app/widgets/form_text_field.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -9,6 +10,15 @@ class SignupScreen extends StatefulWidget {
 }
 
 class SignupScreenState extends State<SignupScreen> {
+  String _userName = '';
+  String _email = '';
+  String _password = '';
+
+  void _signup() async {
+    final user = await AuthRepository().signup(_userName, _email, _password);
+    print(user);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,24 +54,31 @@ class SignupScreenState extends State<SignupScreen> {
                     FormTextField(
                       label: 'Username',
                       hintText: 'Enter your username',
+                      onChanged: (value) => setState(() => _userName = value),
                     ),
                     const SizedBox(height: 16.0),
                     FormTextField(
                       label: 'Email',
                       hintText: 'Enter your email',
                       keyboardType: TextInputType.emailAddress,
+                      onChanged: (value) => setState(() => _email = value),
                     ),
                     const SizedBox(height: 16.0),
                     FormTextField(
                       label: 'Password',
                       hintText: 'Enter your password',
                       obscureText: true,
+                      onChanged: (value) => setState(() => _password = value),
                     ),
                     const SizedBox(height: 16.0),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: _userName.isNotEmpty &&
+                                _email.isNotEmpty &&
+                                _password.isNotEmpty
+                            ? _signup
+                            : null,
                         style: ButtonStyle(
                           backgroundColor:
                               WidgetStateProperty.resolveWith<Color>((states) {
