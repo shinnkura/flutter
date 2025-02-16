@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 
 class PostInput extends StatelessWidget {
+  final TextEditingController controller;
+  final Function(String) onChanged;
+  final Function() onSubmitted;
+  final String content;
+
   const PostInput({
     super.key,
+    required this.controller,
+    required this.onChanged,
+    required this.onSubmitted,
+    required this.content,
   });
 
   @override
@@ -26,10 +35,12 @@ class PostInput extends StatelessWidget {
             ),
             style: const TextStyle(color: Colors.black),
             maxLines: 3,
+            controller: controller,
+            onChanged: onChanged,
           ),
           const SizedBox(height: 8.0),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: content.isNotEmpty ? onSubmitted : null,
             style: ButtonStyle(
               minimumSize: WidgetStateProperty.all(
                 const Size(double.infinity, 40),

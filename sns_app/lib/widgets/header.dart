@@ -34,15 +34,16 @@ class Header extends ConsumerWidget {
               ),
             ),
             const PopupMenuItem<int>(
-                value: 1,
-                child: ListTile(
-                  title: Text(
-                    "Sign Out",
-                    style: TextStyle(
-                      color: Colors.blue,
-                    ),
+              value: 1,
+              child: ListTile(
+                title: Text(
+                  "Sign Out",
+                  style: TextStyle(
+                    color: Colors.blue,
                   ),
-                ))
+                ),
+              ),
+            ),
           ],
           onSelected: (val) => _handleMenuSelected(ref, val),
         ),
