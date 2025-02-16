@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sns_app/modules/auth/current_user.store.dart';
 import 'package:sns_app/screens/home_screen.dart';
 import 'package:sns_app/screens/signin_screen.dart';
 import 'package:sns_app/screens/signup_screen.dart';
@@ -11,26 +13,39 @@ void main() async {
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_API_KEY']!,
   );
-  runApp(SnsApp());
+  runApp(
+    ProviderScope(
+      // グローバルステートをアプリ全体で共有する
+      child: SnsApp(),
+    ),
+  );
 }
 
-class SnsApp extends StatefulWidget {
+class SnsApp extends ConsumerStatefulWidget {
   const SnsApp({super.key});
 
   @override
   SnsAppState createState() => SnsAppState();
 }
 
-class SnsAppState extends State<SnsApp> {
-  @override
-  // This widget is the root of your application.
+class SnsAppState extends ConsumerState<SnsApp> {
+  Widget _buildBody() {
+    final currentUser = ref.watch(currentUserProvider);
+    // ログインしていない場合はサインイン画面を表示
+    if (currentUser == null) {
+      return const SigninScreen();
+    }
+    // ログインしている場合はホーム画面を表示
+    return const HomeScreen();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         brightness: Brightness.dark,
-        primaryColor: Color(0xff34d399),
-        appBarTheme: AppBarTheme(
+        primaryColor: const Color(0xff34d399),
+        appBarTheme: const AppBarTheme(
           color: Color(0xff34D399),
           elevation: 0,
         ),
@@ -55,7 +70,7 @@ class SnsAppState extends State<SnsApp> {
             );
         }
       },
-      home: const SigninScreen(),
+      home: _buildBody(),
     );
   }
 }

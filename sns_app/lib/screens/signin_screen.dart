@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sns_app/modules/auth/auth.repository.dart';
+import 'package:sns_app/modules/auth/current_user.store.dart';
 import 'package:sns_app/widgets/form_text_field.dart';
 import 'package:sns_app/widgets/keyboard_aware.dart';
 
-class SigninScreen extends StatefulWidget {
+class SigninScreen extends ConsumerStatefulWidget {
   const SigninScreen({super.key});
 
   @override
   SigninScreenState createState() => SigninScreenState();
 }
 
-class SigninScreenState extends State<SigninScreen> {
+class SigninScreenState extends ConsumerState<SigninScreen> {
   String _email = '';
   String _password = '';
 
   void _signin() async {
     final user = await AuthRepository().signin(_email, _password);
-    print(user);
+    ref.read(currentUserProvider.notifier).setCurrentUser(user);
   }
 
   @override
