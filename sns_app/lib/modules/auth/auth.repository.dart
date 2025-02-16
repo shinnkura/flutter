@@ -17,4 +17,11 @@ class AuthRepository {
     );
     return response.user;
   }
+
+  // 現在のユーザーを取得して、毎回ログインしなくてよくする
+  // Supabaseだと１時間は保持してくれる
+  Future<User?> getCurrentUser() async {
+    final response = await Supabase.instance.client.auth.getUser();
+    return response.user;
+  }
 }
