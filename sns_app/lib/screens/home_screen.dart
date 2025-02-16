@@ -17,11 +17,31 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
   String _content = '';
   List<Post> _posts = [];
   final _textController = TextEditingController();
+  final _limit = 10;
+  int _page = 1;
+  bool _isLoading = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _fetchPosts();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _initialize() {
+    _fetchPosts();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _fetchPosts();
+      }
+    });
   }
 
   void _createPost() async {
@@ -37,9 +57,18 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _fetchPosts() async {
-    final postList = await PostRepository().find();
+    if (_isLoading) return;
     setState(() {
-      _posts = postList;
+      _isLoading = true;
+    });
+    final postList = await PostRepository().find(_page, _limit);
+    setState(() {
+      _posts = [
+        ..._posts,
+        ...postList,
+      ];
+      _page++;
+      _isLoading = false;
     });
   }
 
@@ -53,6 +82,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
       body: Container(
         color: Colors.white,
         child: ListView(
+          controller: _scrollController,
           children: [
             PostInput(
               controller: _textController,
