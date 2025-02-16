@@ -24,4 +24,9 @@ class AuthRepository {
     final response = await Supabase.instance.client.auth.getUser();
     return response.user;
   }
+
+  Future<bool> signout() async {
+    await Supabase.instance.client.auth.signOut();
+    return true;
+  }
 }
