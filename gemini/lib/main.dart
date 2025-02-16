@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 const prompt = '''
 あなたは20年以上のキャリアがあるフルスタックエンジニアです。
@@ -42,7 +43,18 @@ class _CodeReviewerState extends State<CodeReviewer> {
     });
 
     final response = await Gemini.instance.text(prompt + _content);
-    print(response?.output);
+    if (!mounted) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.8,
+          width: MediaQuery.of(context).size.width,
+          child: Markdown(data: response?.output ?? ""),
+        );
+      },
+    );
 
     setState(() {
       _isLoading = false;
